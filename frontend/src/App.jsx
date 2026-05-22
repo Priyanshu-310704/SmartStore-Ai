@@ -297,6 +297,24 @@ function App() {
     }
   }
 
+  const seedProducts = async () => {
+    try {
+      setLoading('seed')
+      if (token) {
+        const response = await api.post('/products/seed')
+        setProducts(response.data.products)
+      } else {
+        setProducts(demoProducts)
+      }
+      setAnalytics(null)
+      showNotice('Sample products loaded')
+    } catch (error) {
+      showNotice(error.response?.data?.message || 'Seed products could not be loaded')
+    } finally {
+      setLoading('')
+    }
+  }
+
   const generateContent = async () => {
     if (!selectedProduct) return
 
@@ -490,7 +508,9 @@ function App() {
           </div>
 
           {activeView === 'dashboard' && <Dashboard dashboard={dashboard} />}
-          {activeView === 'products' && <Products products={products} onEdit={openProductForm} onDelete={deleteProduct} />}
+          {activeView === 'products' && (
+            <Products products={products} onEdit={openProductForm} onDelete={deleteProduct} onSeed={seedProducts} loading={loading} />
+          )}
           {activeView === 'ai' && (
             <AiStudio
               products={products}
@@ -638,12 +658,17 @@ function Metric({ title, value, tone = 'default' }) {
   )
 }
 
-function Products({ products, onEdit, onDelete }) {
+function Products({ products, onEdit, onDelete, onSeed, loading }) {
   return (
     <section className="panel">
       <div className="panel-heading">
-        <h2>Product management</h2>
-        <span>Add, edit, delete and prepare products for AI generation</span>
+        <div>
+          <h2>Product management</h2>
+          <span className="block text-left">Add, edit, delete and prepare products for AI generation</span>
+        </div>
+        <button className="secondary-button" onClick={onSeed} disabled={loading === 'seed' || products.length > 0}>
+          {loading === 'seed' ? 'Loading...' : 'Load sample data'}
+        </button>
       </div>
       <div className="overflow-x-auto">
         <table className="data-table">

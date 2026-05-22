@@ -58,6 +58,61 @@ router.post(
   })
 );
 
+router.post(
+  '/seed',
+  asyncHandler(async (req, res) => {
+    const existingCount = await Product.countDocuments({ user: req.user._id });
+
+    if (existingCount > 0) {
+      return res.status(409).json({ message: 'Seed data is only available for an empty product list' });
+    }
+
+    const products = await Product.insertMany(
+      [
+        {
+          user: req.user._id,
+          name: 'AeroFit Smart Watch',
+          category: 'Wearables',
+          price: 3499,
+          costPrice: 2100,
+          stock: 8,
+          unitsSold: 82,
+          description: 'A sleek fitness smartwatch with heart-rate tracking, water resistance and long battery life.',
+          seoTags: ['smart watch', 'fitness tracker', 'wearables'],
+          marketingCaptions: ['Track better. Train smarter. Sell faster.'],
+        },
+        {
+          user: req.user._id,
+          name: 'LumaDesk LED Lamp',
+          category: 'Home Office',
+          price: 1599,
+          costPrice: 760,
+          stock: 3,
+          unitsSold: 44,
+          description: 'Adjustable LED desk lamp with warm, cool and reading modes for compact workspaces.',
+          seoTags: ['desk lamp', 'led lamp', 'home office'],
+          marketingCaptions: ['Make late-night work feel lighter.'],
+        },
+        {
+          user: req.user._id,
+          name: 'UrbanPack Travel Bag',
+          category: 'Accessories',
+          price: 2299,
+          costPrice: 1250,
+          stock: 16,
+          unitsSold: 63,
+          description: 'Durable travel backpack with laptop storage, anti-theft zippers and weekend capacity.',
+          seoTags: ['travel bag', 'laptop backpack', 'anti theft bag'],
+          marketingCaptions: ['Built for commutes, classes and quick trips.'],
+        },
+      ],
+      { ordered: true }
+    );
+
+    res.status(201).json({ products });
+  })
+);
+
 router.put(
   '/:id',
   asyncHandler(async (req, res) => {
